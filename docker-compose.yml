@@ -1,0 +1,16 @@
+services:
+  pup-pdf:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: pup-pdf
+    command: ["bun", "run", "start"]
+    cap_add:
+      - SYS_ADMIN
+    ports:
+      - "3000:3000"
+    restart: always
+networks:
+  default:
+    external: true
+    name: db_default
