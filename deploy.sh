@@ -2,16 +2,16 @@
 set -e
 
 echo "🔨 Building image..."
-docker build -t pup-pdf:latest .
+docker build -t pdf-generator:latest .
 
 echo "📦 Deploying to swarm..."
-docker stack deploy -c docker-compose.yml bun
+docker stack deploy -c docker-compose.yml pup
 
 echo "⏳ Waiting for service to be ready..."
 sleep 5
 
 echo "📊 Service status:"
-docker service ps bun_pup-pdf
+docker service ps pup_pdf-generator
 
-echo "📝 Following logs (Ctrl+C to exit):"
-docker service logs -f bun_pup-pdf --tail 50
+# echo "📝 Following logs (Ctrl+C to exit):"
+# docker service logs -f pup_pdf-generator --tail 50
