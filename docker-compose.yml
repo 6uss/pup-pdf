@@ -1,9 +1,9 @@
 version: "3.8"
 
 services:
-  pup-pdf:
-    image: pup-pdf:latest # Must build and tag image first
-    hostname: pup-pdf
+  pdf-generator:
+    image: pdf-generator:latest # Must build and tag image first
+    hostname: pdf-generator
     command: ["bun", "run", "start"]
     deploy:
       replicas: 1
