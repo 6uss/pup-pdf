@@ -1,16 +1,49 @@
+version: "3.8"
+
 services:
   pup-pdf:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: pup-pdf
+    image: pup-pdf:latest # Must build and tag image first
+    hostname: pup-pdf
     command: ["bun", "run", "start"]
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+      placement:
+        constraints:
+          - node.role == manager # Or specific node
+      update_config:
+        parallelism: 1
+        delay: 10s
+        failure_action: rollback
+        order: start-first # Start new before stopping old (zero downtime)
+        # resources:
+        #   limits:
+        #     cpus: "2.0"
+        #     memory: 2G
+        # reservations:
+        # cpus: "0.5"
+        # memory: 512M
     cap_add:
       - SYS_ADMIN
     ports:
-      - "3000:3000"
-    restart: always
+      - target: 3000
+        published: 3000
+        protocol: tcp
+        mode: ingress # Load balance across replicas if scaled
+    networks:
+      - db_default
+    # healthcheck:
+    #   test: ["CMD-SHELL", "curl -f http://localhost:3000/health || exit 1"]
+    #   interval: 30s
+    #   timeout: 10s
+    #   retries: 3
+    #   start_period: 40s
+
 networks:
-  default:
+  db_default:
     external: true
-    name: db_default
+    attachable: true
