@@ -1,0 +1,49 @@
+version: "3.8"
+
+services:
+  pdf-generator:
+    image: pdf-generator:latest # Must build and tag image first
+    hostname: pdf-generator
+    command: ["bun", "run", "start"]
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+      placement:
+        constraints:
+          - node.role == manager
+      update_config:
+        parallelism: 1
+        delay: 10s
+        failure_action: rollback
+        order: start-first # Start new before stopping old (zero downtime)
+        # resources:
+        #   limits:
+        #     cpus: "2.0"
+        #     memory: 2G
+        # reservations:
+        # cpus: "0.5"
+        # memory: 512M
+    cap_add:
+      - SYS_ADMIN
+    ports:
+      - target: 9550
+        published: 9550
+        protocol: tcp
+        mode: ingress # Load balance across replicas if scaled
+    networks:
+      - koosta_net
+    # healthcheck:
+    #   test: ["CMD-SHELL", "curl -f http://localhost:3000/health || exit 1"]
+    #   interval: 30s
+    #   timeout: 10s
+    #   retries: 3
+    #   start_period: 40s
+
+networks:
+  koosta_net:
+    external: true
+    attachable: true
